@@ -1,31 +1,5 @@
 # EKA Motors - Site e-commerce de véhicules (Microservices)
 
-## Groupe 9
-
-- Dorian
-- Nathan
-- Axel
-- Okan
-
-## Répartition des tâches
-
-| Membre | Éléments réalisés |
-|--------|-------------------|
-| Dorian | Sécurisation de l'application monolithique avec Spring Security, mise en place JWT, sécurisation des routes, documentation de sécurité |
-| Nathan | Migration vers architecture Microservices, rédaction du rapport d'architecture, transformation de l'application, création des services |
-| Axel | Mise en place de Dockerfile pour chaque projet, création de l'architecture Docker Compose, documentation sur les différences Docker vs Virtualisation |
-| Okan | Mise en œuvre CI/CD GitLab, génération automatique des images Docker, hébergement sur le GitLab Container Registry, mise à jour du docker-compose |
-
-
-Bien évidemment personne n'était uniquement sur sa tâche. Il y avait beaucoup d'entre-aide et un besoin de compréhension et d'apprentissage pour certaine personne du groupe. Les taches sité ci-dessus sont celle où l'élève a consacré le plus de temps 
-Bien évidemment personne n'était uniquement sur sa tâche. Il y avait beaucoup d'entre-aide et un besoin de compréhension et d'apprentissage pour certaine personne du groupe. Les taches sité ci-dessus sont celle où l'élève a consacré le plus de temps 
-
-Bien évidemment, personne n'était uniquement sur sa tâche. Il y avait beaucoup d'entraide et un besoin de compréhension et d'apprentissage pour certaines personnes du groupe. Les tâches citées ci-dessus sont celles où l'élève a consacré le plus de temps
-
-## Eléments non-réalisés du cahier des charges
-Aucune tâche n'a été oublié. Nous avons tout fait.
-Nous avons juste manqué de temps pour couvrir plus de pourcentage de code avec SonarQube.
-
 ## Description
 
 Site e-commerce pour EKA Motors permettant de lister, vendre et acheter des voitures, basé sur une architecture microservices.
