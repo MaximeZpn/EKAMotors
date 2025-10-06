@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace</title>
+    <link rel="stylesheet" href="/style/home.css">
+</head>
+<body>
+<div class="user-info">
+    <span id="solde">0 $</span>
+    <button id="btnCompte" class="btn-compte">👤 <span id="username">Utilisateur</span></button>
+    <button onclick="deconnecter()">Déconnexion</button>
+</div>
+
+<div class="container">
+    <div class="card" onclick="acheter()">🛒 Buy</div>
+    <div class="card" onclick="vendre()">💰 Sell</div>
+    <div class="card" onclick="transaction()"> Transaction</div>
+
+</div>
+<script src="/js/home.js"></script>
+</body>
+</html>

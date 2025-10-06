@@ -1,0 +1,48 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+.container {
+    margin-top: 50px;
+}
+.card {
+    display: inline-block;
+    margin: 20px;
+    padding: 20px;
+    border: 2px solid black;
+    cursor: pointer;
+    font-size: 20px;
+}
+.user-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: darkred;
+}
+
+.btn-compte {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.btn-compte:hover {
+    background-color: #0056b3;
+}

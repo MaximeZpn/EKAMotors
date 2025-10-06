@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer une Carte</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4a90e2;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      display: none;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      background-color: #4a90e2;
+      color: white;
+    }
+    
+    nav {
+      display: flex;
+      align-items: center;
+    }
+    
+    nav a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: none;
+    }
+    
+    #logout-btn {
+      background-color: rgba(255,255,255,0.2);
+      padding: 6px 12px;
+      margin-left: 15px;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group select, .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .type-selection {
+      margin-bottom: 15px;
+    }
+    
+    .type-option {
+      padding: 8px;
+      border: 2px solid transparent;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-block;
+      width: 100px;
+      text-align: center;
+    }
+    
+    .type-option.selected {
+      border-color: #4a90e2;
+      font-weight: bold;
+    }
+    
+    .type-fire {
+      background-color: #FFEBEE;
+      color: #D32F2F;
+    }
+    
+    .type-water {
+      background-color: #E3F2FD;
+      color: #1976D2;
+    }
+    
+    .type-earth {
+      background-color: #E8F5E9;
+      color: #388E3C;
+    }
+    
+    .type-air {
+      background-color: #F3E5F5;
+      color: #7B1FA2;
+    }
+    
+    .type-normal {
+      background-color: #ECEFF1;
+      color: #546E7A;
+    }
+    
+    .energy-indicator {
+      background-color: #2ecc71;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* Add user assignment styling */
+    .user-assignment {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .user-assignment h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .user-assignment .current-user {
+      background-color: #e3f2fd;
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      border-left: 3px solid #2196f3;
+    }
+
+    .toggle-assignment {
+      background-color: transparent;
+      color: #4a90e2;
+      border: 1px solid #4a90e2;
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .user-search {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .user-search.active {
+      display: block;
+    }
+
+    .user-result-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .user-result-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .selected-user {
+      background-color: #e8f5e9;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 10px;
+      border-left: 3px solid #4caf50;
+    }
+  </style>
+  <script src="/js/auth-check.js"></script>
+</head>
+<body>
+  <header>
+    <h2>CardGame</h2>
+    <nav>
+      <a href="/index.html">Accueil</a>
+      <a href="/market.html">Marché</a>
+      <span id="username-display"></span>
+      <button id="logout-btn" class="button">Déconnexion</button>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h1>Créer une nouvelle carte</h1>
+    <div id="error-container" class="error" style="display: none;"></div>
+    
+    <!-- Add debug toggle button -->
+    <div style="text-align:right; margin-bottom:10px;">
+      <button type="button" id="debug-toggle" style="background:#333; font-size:12px;">Toggle Debug</button>
+    </div>
+    
+    <!-- Add debug console -->
+    <div id="debug-console" style="display:none; background:#000; color:#0f0; padding:10px; font-family:monospace; height:200px; overflow-y:auto; margin-bottom:15px; font-size:12px; border-radius:4px;"></div>
+    
+    <form id="create-card-form">
+      <div class="form-group">
+        <label for="nom">Nom de la carte</label>
+        <input type="text" id="nom" name="nom" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="rarete">Rareté</label>
+        <select id="rarete" name="rarete">
+          <option value="COMMUN">Commun</option>
+          <option value="RARE">Rare</option>
+          <option value="EPIQUE">Épique</option>
+          <option value="LEGENDAIRE">Légendaire</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="prix">Prix</label>
+        <input type="number" id="prix" name="prix" min="0" step="0.01" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Type de carte</label>
+        <div class="type-selection">
+          <div class="type-option type-fire" data-type="FIRE">FEU</div>
+          <div class="type-option type-water" data-type="WATER">EAU</div>
+          <div class="type-option type-earth" data-type="EARTH">TERRE</div>
+          <div class="type-option type-air" data-type="AIR">AIR</div>
+          <div class="type-option type-normal selected" data-type="NORMAL">NORMAL</div>
+        </div>
+        <input type="hidden" id="type" name="type" value="NORMAL">
+      </div>
+      
+      <div class="energy-indicator">
+        Énergie: <span id="energy-value">100</span> / 100
+      </div>
+
+      <div class="user-assignment">
+        <h3>Assigner à un autre utilisateur</h3>
+        <div class="current-user" id="current-user">Utilisateur actuel: <span id="current-username"></span></div>
+        <button type="button" class="toggle-assignment" id="toggle-assignment">Changer d'utilisateur</button>
+        <div class="user-search" id="user-search">
+          <input type="text" id="user-search-input" placeholder="Rechercher un utilisateur...">
+          <div id="user-search-results"></div>
+        </div>
+        <div class="selected-user" id="selected-user" style="display: none;"></div>
+      </div>
+      
+      <button type="submit" class="btn btn-primary">Créer la carte</button>
+    </form>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        window.location.href = '/connexion.html';
+        return;
+      }
+      
+      // Handle type selection
+      const typeOptions = document.querySelectorAll('.type-option');
+      const typeInput = document.getElementById('type');
+      
+      typeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          // Remove selected class from all options
+          typeOptions.forEach(opt => opt.classList.remove('selected'));
+          
+          // Add selected class to clicked option
+          this.classList.add('selected');
+          
+          // Update hidden input
+          typeInput.value = this.getAttribute('data-type');
+        });
+      });
+      
+      // Handle form submission
+      const form = document.getElementById('create-card-form');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        createCard();
+      });
+
+      // Handle user assignment toggle
+      const toggleAssignmentBtn = document.getElementById('toggle-assignment');
+      const userSearch = document.getElementById('user-search');
+      const userSearchInput = document.getElementById('user-search-input');
+      const userSearchResults = document.getElementById('user-search-results');
+      const selectedUser = document.getElementById('selected-user');
+      const currentUser = document.getElementById('current-user');
+      const currentUsername = document.getElementById('current-username');
+
+      toggleAssignmentBtn.addEventListener('click', function() {
+        userSearch.classList.toggle('active');
+      });
+
+      userSearchInput.addEventListener('input', async function() {
+        const query = userSearchInput.value.trim();
+        if (query.length > 2) {
+          const results = await searchUsers(query);
+          displayUserResults(results);
+        } else {
+          userSearchResults.innerHTML = '';
+        }
+      });
+
+      async function searchUsers(query) {
+        const response = await fetch(`/api/users?search=${query}`);
+        if (response.ok) {
+          return await response.json();
+        } else {
+          return [];
+        }
+      }
+
+      function displayUserResults(users) {
+        userSearchResults.innerHTML = '';
+        users.forEach(user => {
+          const item = document.createElement('div');
+          item.classList.add('user-result-item');
+          item.textContent = user.username;
+          item.addEventListener('click', function() {
+            selectUser(user);
+          });
+          userSearchResults.appendChild(item);
+        });
+      }
+
+      function selectUser(user) {
+        selectedUser.textContent = `Utilisateur sélectionné: ${user.username}`;
+        selectedUser.style.display = 'block';
+        currentUser.style.display = 'none';
+        userSearch.classList.remove('active');
+      }
+
+      // Set current user
+      currentUsername.textContent = localStorage.getItem('username');
+
+      // Debug utilities
+      const debugConsole = document.getElementById('debug-console');
+      const debugToggle = document.getElementById('debug-toggle');
+      
+      debugToggle.addEventListener('click', function() {
+        debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
+      });
+      
+      function debugLog(message, type = 'info') {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString() + '.' + now.getMilliseconds().toString().padStart(3, '0');
+        const line = document.createElement('div');
+        line.style.color = type === 'error' ? '#f77' : (type === 'success' ? '#7f7' : '#0f0');
+        line.innerHTML = `[${timeStr}] ${message}`;
+        debugConsole.appendChild(line);
+        debugConsole.scrollTop = debugConsole.scrollHeight;
+        
+        // Also log to browser console
+        if (type === 'error')
+          console.error(message);
+        else if (type === 'success')
+          console.log('%c' + message, 'color: green');
+        else
+          console.log(message);
+      }
+      
+      // Override fetch with debugging
+      const originalFetch = window.fetch;
+      window.fetch = async function(url, options = {}) {
+        debugLog(`Fetch request: ${options?.method || 'GET'} ${url}`);
+        if (options?.body) {
+          try {
+            debugLog(`Request body: ${options.body}`);
+          } catch (e) {
+            debugLog(`Request body: [cannot display]`);
+          }
+        }
+        
+        try {
+          const response = await originalFetch(url, options);
+          debugLog(`Response status: ${response.status} ${response.statusText}`);
+          
+          // Clone response to log its content without consuming it
+          const clonedResponse = response.clone();
+          try {
+            const text = await clonedResponse.text();
+            debugLog(`Response body: ${text.substring(0, 500)}${text.length > 500 ? '...' : ''}`);
+          } catch (e) {
+            debugLog(`Response body: [cannot display] - ${e.message}`, 'error');
+          }
+          
+          return response;
+        } catch (error) {
+          debugLog(`Fetch error: ${error.message}`, 'error');
+          throw error;
+        }
+      };
+    });
+    
+    async function createCard() {
+      const userId = localStorage.getItem('user_id');
+      
+      // Get form data
+      const nom = document.getElementById('nom').value;
+      const description = document.getElementById('description').value;
+      const rarete = document.getElementById('rarete').value;
+      const prix = parseFloat(document.getElementById('prix').value);
+      const type = document.getElementById('type').value;
+      
+      // Validate data
+      if (!nom || !prix) {
+        showError('Veuillez remplir tous les champs obligatoires');
+        return;
+      }
+
+      // Log detailed debugging information
+      console.log("===== CARD CREATION DEBUGGING =====");
+      console.log("Creating card with proprietaireId:", userId);
+      
+      // Create card data object
+      const cardData = {
+        nom: nom,
+        description: description,
+        rarete: rarete,
+        prix: prix,
+        aVendre: false,
+        proprietaireId: parseInt(userId),
+        energy: 100,
+        type: type
+      };
+      
+      console.log("Card data being sent:", cardData);
+      
+      try {
+        showError('Création en cours...');
+        
+        // Use fetch with explicit headers and error handling
+        const response = await fetch('/api/cartes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(cardData)
+        });
+        
+        console.log("Response status:", response.status);
+        
+        // Try to get response text first
+        const responseText = await response.text();
+        console.log("Raw response:", responseText);
+        
+        if (response.ok) {
+          // Parse the response as JSON if it's not empty
+          let result;
+          if (responseText && responseText.trim() !== '') {
+            try {
+              result = JSON.parse(responseText);
+              console.log("Parsed card creation result:", result);
+            } catch (parseError) {
+              console.error("Error parsing response:", parseError);
+            }
+          }
+          
+          // Check if we got a valid result with an ID
+          if (result && result.id) {
+            console.log("Card created successfully with ID:", result.id);
+            
+            // Store the card ID for verification
+            localStorage.setItem('lastCreatedCardId', result.id);
+            localStorage.setItem('lastCreatedCardTime', new Date().toISOString());
+            
+            // Show success message
+            alert(`Carte "${result.nom}" créée avec succès! ID: ${result.id}`);
+            
+            // Redirect to market after creation
+            window.location.href = `/market.html`;
+          } else {
+            console.warn("Card may have been created but ID is missing from response");
+            
+            // Try to extract possible ID from the response text
+            let extractedId;
+            try {
+              // Look for ID pattern in the response
+              const idMatch = responseText.match(/"id"\s*:\s*(\d+)/i);
+              if (idMatch && idMatch[1]) {
+                extractedId = idMatch[1];
+                console.log("Extracted ID from response:", extractedId);
+                localStorage.setItem('lastCreatedCardId', extractedId);
+              }
+            } catch (ex) {
+              console.error("Failed to extract ID from response:", ex);
+            }
+            
+            alert('Carte créée, mais impossible de récupérer son ID avec précision');
+            window.location.href = '/market.html';
+          }
+        } else {
+          // Handle error response
+          console.error("Error response:", responseText);
+          showError(`Erreur lors de la création de la carte (${response.status}): ${responseText || 'Erreur inconnue'}`);
+        }
+      } catch (error) {
+        console.error('Error creating card:', error);
+        showError('Erreur de connexion au serveur: ' + error.message);
+      }
+    }
+    
+    function showError(message) {
+      const errorContainer = document.getElementById('error-container');
+      errorContainer.textContent = message;
+      errorContainer.style.display = 'block';
+      
+      // Hide after 5 seconds
+      setTimeout(() => {
+        errorContainer.style.display = 'none';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

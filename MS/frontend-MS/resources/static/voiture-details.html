@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détails du Véhicule</title>
+  <script>
+    (async function() {
+      const resp = await fetch('/card-details.html');
+      if (resp.ok) {
+        let html = await resp.text();
+        html = html
+          .replace(/<title>[^<]*<\/title>/, '<title>Détails du Véhicule<\/title>')
+          .replace(/CardGame/g, 'EKA Motors')
+          .replace(/Marché/g, 'Catalogue')
+          .replace(/Carte/g, 'Véhicule')
+          .replace(/Énergie/g, 'Autonomie')
+          .replace(/Rareté/g, 'Catégorie')
+          .replace(/\/market\.html/g, '/catalogue.html');
+        document.open();
+        document.write(html);
+        document.close();
+      } else {
+        document.write('<p>Impossible de charger la fiche véhicule.</p>');
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>
+
+
+

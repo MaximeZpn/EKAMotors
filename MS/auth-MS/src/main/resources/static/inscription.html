@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription</title>
+  <link rel="stylesheet" href="/style/auth.css">
+</head>
+<body>
+<div class="container">
+  <h2>Inscription</h2>
+  <div id="error-message" class="error-message" style="display:none;"></div>
+  <form id="formInscription">
+    <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <button type="submit">S'inscrire</button>
+  </form>
+  <p>Déjà un compte ? <a href="/connexion.html">Se connecter</a></p>
+</div>
+<script>
+  document.getElementById('formInscription').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    // Hide any previous error message
+    const errorElement = document.getElementById('error-message');
+    errorElement.style.display = 'none';
+    
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          email: email,
+          password: password
+        })
+      });
+      
+      if (response.ok) {
+        // Registration successful, redirect to login page
+        window.location.href = '/connexion.html?registered=true';
+      } else {
+        // Get error message from response
+        const errorText = await response.text();
+        errorElement.textContent = errorText || 'Erreur lors de l\'inscription';
+        errorElement.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      errorElement.textContent = 'Erreur de connexion au serveur';
+      errorElement.style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>

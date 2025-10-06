@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Rebranding Données en Véhicules</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; }
+    h1 { color: #333; }
+    .actions { display: flex; gap: 10px; margin-bottom: 15px; }
+    button { background: #4a90e2; color: #fff; border: 0; padding: 10px 14px; border-radius: 4px; cursor: pointer; }
+    button.secondary { background: #999; }
+    .log { background: #000; color: #0f0; padding: 10px; font-family: monospace; height: 280px; overflow-y: auto; border-radius: 4px; }
+    .summary { margin: 15px 0; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #fff; }
+    .success { color: #2ecc71; }
+    .error { color: #e74c3c; }
+    .warn { color: #f39c12; }
+    label { font-weight: bold; }
+    input[type="text"], input[type="url"] { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+  </style>
+  <script src="/js/auth-check.js"></script>
+</head>
+<body>
+  <h1>Rebranding des cartes en véhicules</h1>
+  <p>Convertit les cartes existantes (ex: Léviathan, Excalibur) en annonces de voitures EKA Motors.</p>
+
+  <div class="summary">
+    <div><strong>Statut:</strong> <span id="status">Prêt</span></div>
+    <div><strong>Résultats:</strong> <span id="result">-</span></div>
+  </div>
+
+  <div class="actions">
+    <button id="previewBtn">Prévisualiser conversion</button>
+    <button id="convertAllBtn">Convertir toutes les cartes</button>
+    <button id="resetSelectionBtn" class="secondary">Réinitialiser</button>
+  </div>
+
+  <div class="grid" id="preview"></div>
+
+  <h3>Console</h3>
+  <div class="log" id="log"></div>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+    const previewEl = document.getElementById('preview');
+
+    function log(msg, cls) {
+      const line = document.createElement('div');
+      if (cls) line.className = cls;
+      const now = new Date().toLocaleTimeString();
+      line.textContent = '[' + now + '] ' + msg;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    const vehicleCatalog = [
+      { nom: 'EKA Nova 1.6', imageUrl: 'https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg', description: 'Berline compacte, fiable et économique.' },
+      { nom: 'EKA Falcon EV', imageUrl: 'https://images.pexels.com/photos/799443/pexels-photo-799443.jpeg', description: '100% électrique, grande autonomie, conduite silencieuse.' },
+      { nom: 'EKA Atlas SUV', imageUrl: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg', description: 'SUV familial spacieux, idéal pour les longs trajets.' },
+      { nom: 'EKA Sprint GT', imageUrl: 'https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg', description: 'Coupé sportif, performances et design agressif.' },
+      { nom: 'EKA Urban Hybrid', imageUrl: 'https://images.pexels.com/photos/97075/pexels-photo-97075.jpeg', description: 'Hybride urbain, faible consommation en ville.' }
+    ];
+
+    function toVehicle(card, idx) {
+      const v = vehicleCatalog[idx % vehicleCatalog.length];
+      return {
+        id: card.id,
+        nom: v.nom,
+        description: v.description,
+        prix: Math.max(9990, Math.round((card.prix || 15000) / 10) * 10),
+        aVendre: !!card.aVendre,
+        proprietaireId: card.proprietaireId,
+        imageUrl: v.imageUrl,
+        type: card.type || 'NORMAL',
+        rarete: card.rarete || 'COMMUN',
+        energy: typeof card.energy === 'number' ? card.energy : 100
+      };
+    }
+
+    async function fetchAllCards() {
+      const resp = await fetch('/api/cartes');
+      if (!resp.ok) throw new Error('Chargement des cartes: ' + resp.status);
+      return await resp.json();
+    }
+
+    function renderPreview(cards) {
+      previewEl.innerHTML = '';
+      cards.slice(0, 10).forEach((c, i) => {
+        const v = toVehicle(c, i);
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `
+          <div><label>Ancien nom</label><div>${c.nom}</div></div>
+          <div><label>Nouveau modèle</label><div>${v.nom}</div></div>
+          <div><label>Prix</label><div>${v.prix} €</div></div>
+          <div><label>Image</label><div><a href="${v.imageUrl}" target="_blank">Voir</a></div></div>
+        `;
+        previewEl.appendChild(el);
+      });
+    }
+
+    async function convertAll() {
+      statusEl.textContent = 'Conversion en cours...';
+      log('Démarrage conversion', 'warn');
+      let ok = 0, ko = 0;
+      try {
+        const cards = await fetchAllCards();
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          const veh = toVehicle(card, i);
+          try {
+            const resp = await fetch(`/api/cartes/${card.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify(veh)
+            });
+            if (resp.ok) { ok++; log(`OK #${card.id} -> ${veh.nom}`, 'success'); }
+            else { ko++; log(`KO #${card.id}: ${await resp.text()}`, 'error'); }
+          } catch (e) {
+            ko++; log(`Erreur #${card.id}: ${e.message}`, 'error');
+          }
+        }
+        statusEl.textContent = 'Terminé';
+        resultEl.textContent = `${ok} succès, ${ko} erreurs`;
+        log('Conversion terminée', 'success');
+      } catch (e) {
+        statusEl.textContent = 'Erreur';
+        resultEl.textContent = e.message;
+        log('Erreur: ' + e.message, 'error');
+      }
+    }
+
+    document.getElementById('previewBtn').addEventListener('click', async () => {
+      statusEl.textContent = 'Prévisualisation...';
+      try {
+        const cards = await fetchAllCards();
+        renderPreview(cards);
+        statusEl.textContent = 'Prêt';
+        resultEl.textContent = `Prévisualisation de ${Math.min(cards.length, 10)} éléments`;
+        log('Prévisualisation générée', 'success');
+      } catch (e) {
+        statusEl.textContent = 'Erreur';
+        resultEl.textContent = e.message;
+        log('Erreur: ' + e.message, 'error');
+      }
+    });
+
+    document.getElementById('convertAllBtn').addEventListener('click', convertAll);
+    document.getElementById('resetSelectionBtn').addEventListener('click', () => { previewEl.innerHTML = ''; resultEl.textContent = '-'; log('Prévisualisation effacée'); });
+  </script>
+</body>
+</html>
+
+
+

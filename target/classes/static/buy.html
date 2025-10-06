@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marché des Cartes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        table {
+            width: 60%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        .card-details {
+            width: 30%;
+            border: 1px solid black;
+            padding: 20px;
+        }
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .selected {
+            background-color: lightblue;
+        }
+    </style>
+    <script>
+        let utilisateur;
+        let selectedCarteId = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("/api/auth/utilisateur")
+                .then(response => {
+                    if (!response.ok) throw new Error("Utilisateur non connecté !");
+                    return response.json();
+                })
+                .then(user => {
+                    utilisateur = user;
+                    document.getElementById("username").innerText = user.surnom;
+                    document.getElementById("solde").innerText = user.solde + " $";
+                    chargerCartes();
+                })
+                .catch(error => {
+                    alert(error);
+                    window.location.href = "login.html";
+                });
+        });
+
+        function chargerCartes() {
+            fetch("/cartes/vente")
+                .then(response => response.json())
+                .then(cartes => {
+                    const table = document.getElementById("cartes-table");
+                    table.innerHTML = "";
+
+                    cartes.forEach(carte => {
+                        let row = table.insertRow();
+                        row.innerHTML = `
+                            <td>${carte.nom}</td>
+                            <td>${carte.description}</td>
+                            <td>${carte.famille}</td>
+                            <td>${carte.affinite}</td>
+                            <td>${carte.energie}</td>
+                            <td>${carte.hp}</td>
+                            <td>${carte.prix} $</td>
+                        `;
+                        row.onclick = () => selectCarte(row, carte);
+                    });
+                });
+        }
+
+        function selectCarte(row, carte) {
+            const rows = document.querySelectorAll("table tr");
+            rows.forEach(r => r.classList.remove("selected"));
+            row.classList.add("selected");
+
+            selectedCarteId = carte.id;
+
+            document.getElementById("card-name").innerText = carte.nom;
+            document.getElementById("card-description").innerText = carte.description;
+            document.getElementById("card-family").innerText = carte.famille;
+            document.getElementById("card-price").innerText = carte.prix + " $";
+            document.getElementById("buy-btn").disabled = false;
+        }
+
+        function acheterCarte() {
+            if (!selectedCarteId) {
+                alert("Veuillez sélectionner une carte !");
+                return;
+            }
+
+            fetch(`/cartes/achat/${utilisateur.id}/${selectedCarteId}`, { method: "POST" })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    window.location.reload();
+                })
+                .catch(error => alert("Erreur : " + error));
+        }
+
+        function deconnecter() {
+            fetch("/api/auth/deconnexion", { method: "POST" })
+                .then(() => {
+                    alert("Déconnexion réussie !");
+                    window.location.href = "login.html";
+                });
+        }
+    </script>
+</head>
+<body>
+<div class="user-info">
+    <span id="solde">0 $</span>
+    <span>👤 <b id="username">Utilisateur</b></span>
+    <button onclick="deconnecter()">Déconnexion</button>
+</div>
+
+<h2>BUY</h2>
+
+<div class="container">
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Family</th>
+            <th>Affinity</th>
+            <th>Energy</th>
+            <th>HP</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody id="cartes-table"></tbody>
+    </table>
+
+    <div class="card-details">
+        <h3 id="card-name">Sélectionnez une carte</h3>
+        <p id="card-description"></p>
+        <p>Famille: <span id="card-family"></span></p>
+        <p>Prix: <span id="card-price"></span></p>
+        <button id="buy-btn" onclick="acheterCarte()" disabled>Acheter</button>
+    </div>
+</div>
+</body>
+</html>

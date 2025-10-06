@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EKA Motors - Catalogue</title>
+  <script>
+    // Charger et adapter market.html existant
+    (async function() {
+      const resp = await fetch('/market.html?t=' + Date.now()); // Cache busting
+      if (resp.ok) {
+        let html = await resp.text();
+
+        // Effectuer des remplacements ciblés sans modifier les identifiants JavaScript
+        const replacements = [
+          { pattern: /<title>[^<]*<\/title>/, replacement: '<title>EKA Motors - Catalogue<\/title>' },
+          { pattern: /Marché de Cartes/g, replacement: 'Catalogue de Voitures' },
+          { pattern: /Mes Cartes/g, replacement: 'Mon Compte' },
+          { pattern: /mes cartes/g, replacement: 'mon compte' },
+          { pattern: /Catalogue de Voitures/g, replacement: 'Catalogue de Voitures' },
+          { pattern: /Carte ID:/g, replacement: 'Véhicule ID:' },
+          { pattern: /Carte:/g, replacement: 'Véhicule:' },
+          { pattern: /\bCartes\b/g, replacement: 'Voitures' },
+          { pattern: /\bcartes\b/g, replacement: 'véhicules' },
+          { pattern: /\bCarte\b(?!\s*ID)/g, replacement: 'Véhicule' },
+          { pattern: /\bcarte\b(?!Id)/g, replacement: 'véhicule' }
+        ];
+
+        replacements.forEach(({ pattern, replacement }) => {
+          html = html.replace(pattern, replacement);
+        });
+
+        // Ajouter un bouton de rafraîchissement et un rafraîchissement automatique
+        html = html.replace(
+          /<h2>Voitures disponibles<\/h2>/,
+          '<h2>Voitures disponibles</h2><button onclick="window.location.reload()" style="margin: 10px; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px;">🔄 Actualiser le catalogue</button>'
+        );
+        
+        document.open();
+        document.write(html);
+        document.close();
+        
+        // Ajouter un rafraîchissement automatique toutes les 30 secondes
+        setInterval(function() {
+          if (window.loadActiveOffers && typeof window.loadActiveOffers === 'function') {
+            console.log('Actualisation automatique du catalogue...');
+            window.loadActiveOffers();
+          }
+        }, 30000);
+        
+      } else {
+        document.write('<p>Impossible de charger le catalogue.</p>');
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>
+
+
+

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - Acheter une carte</title>
+    <link rel="stylesheet" href="/style/market.css">
+</head>
+<body>
+
+<!-- Infos utilisateur + Déconnexion -->
+<div class="user-info">
+    <span id="solde">0 $</span>
+    <span>👤 <b id="username">Utilisateur</b></span>
+    <button onclick="deconnecter()">Déconnexion</button>
+</div>
+
+<div class="container">
+    <h2>Marketplace - Cartes en vente</h2>
+
+    <!-- Bouton de retour -->
+    <button id="retourAccueil">⬅ Retour</button>
+
+    <div class="content">
+        <!-- Tableau des cartes -->
+        <table id="cartesTable">
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Rareté</th>
+                <th>Niveau</th>
+                <th>Prix</th>
+                <th>Propriétaire</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Les cartes seront chargées ici dynamiquement -->
+            </tbody>
+        </table>
+
+        <!-- Détails de la carte sélectionnée -->
+        <div id="detailsCarte">
+            <h3>Détails de la carte</h3>
+            <img id="imageCarte" src="/images/default-card.png" alt="Aucune carte sélectionnée">
+            <p><b>Nom :</b> <span id="nomCarte">-</span></p>
+            <p><b>Description :</b> <span id="descriptionCarte">-</span></p>
+            <p><b>Rareté :</b> <span id="rareteCarte">-</span></p>
+            <p><b>Niveau :</b> <span id="niveauCarte">-</span></p>
+            <p><b>Prix :</b> <span id="prixCarte">-</span></p>
+            <p><b>Propriétaire :</b> <span id="proprietaireCarte">-</span></p>
+            <button id="acheterCarte" disabled>Acheter</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/market.js"></script>
+<script src="/js/home.js"></script> <!-- Gestion utilisateur & déconnexion -->
+</body>
+</html>

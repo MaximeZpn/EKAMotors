@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification des droits Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 4px; overflow: auto; }
+        button { padding: 8px 16px; margin: 10px 0; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Vérification des droits Administrateur</h1>
+    
+    <div>
+        <h2>Informations sur l'utilisateur connecté</h2>
+        <pre id="userInfo">Chargement...</pre>
+        <button onclick="checkUserInfo()">Vérifier l'utilisateur</button>
+    </div>
+    
+    <div>
+        <h2>Test d'accès administrateur</h2>
+        <pre id="adminCheck">Cliquez sur le bouton pour vérifier</pre>
+        <button onclick="checkAdminAccess()">Vérifier l'accès admin</button>
+    </div>
+    
+    <div>
+        <h2>Actions</h2>
+        <button onclick="goToCompte()">Aller à la page compte.html</button>
+        <button onclick="goToHome()">Retour à l'accueil</button>
+        <button onclick="logout()">Se déconnecter</button>
+    </div>
+    
+    <script>
+        function checkUserInfo() {
+            const token = sessionStorage.getItem("jwtToken");
+            if (!token) {
+                document.getElementById("userInfo").textContent = "Aucun token trouvé. Vous n'êtes pas connecté.";
+                return;
+            }
+            
+            fetch("/api/debug/current-user", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("userInfo").textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById("userInfo").textContent = "Erreur: " + error.message;
+            });
+        }
+        
+        function checkAdminAccess() {
+            const token = sessionStorage.getItem("jwtToken");
+            if (!token) {
+                document.getElementById("adminCheck").textContent = "Aucun token trouvé. Vous n'êtes pas connecté.";
+                return;
+            }
+            
+            fetch("/api/debug/check-admin-access", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("adminCheck").textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById("adminCheck").textContent = "Erreur: " + error.message;
+            });
+        }
+        
+        function goToCompte() {
+            window.location.href = "/compte.html";
+        }
+        
+        function goToHome() {
+            window.location.href = "/home.html";
+        }
+        
+        function logout() {
+            sessionStorage.removeItem("jwtToken");
+            window.location.href = "/connexion.html";
+        }
+        
+        // Vérifier automatiquement les infos utilisateur au chargement
+        checkUserInfo();
+    </script>
+</body>
+</html>

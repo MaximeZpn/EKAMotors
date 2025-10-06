@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vente Express - EKA Motors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #28a745;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f8f9fa;
+            color: #333;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .logs {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Vente Express</h1>
+        <p class="subtitle">Solution simplifiée qui marche à coup sûr !</p>
+        
+        <div class="highlight">
+            <strong>📌 Comment ça marche :</strong><br>
+            1. Créer d'abord votre véhicule<br>
+            2. Puis le mettre en vente directement<br>
+            3. Il apparaîtra dans le catalogue !
+        </div>
+        
+        <div class="navigation">
+            <a href="/" class="nav-btn">🏠 Accueil</a>
+            <a href="/catalogue.html" class="nav-btn">🔍 Catalogue</a>
+        </div>
+
+        <form id="venteForm">
+            <div class="form-group">
+                <label for="nom">Nom du véhicule *</label>
+                <input type="text" id="nom" placeholder="Ex: Peugeot 308, Renault Clio..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" placeholder="Année, kilométrage, état général..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="prix">Prix de vente *</label>
+                <input type="number" id="prix" placeholder="15000" min="100" step="100" required>
+                <small>Prix en euros</small>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                🚀 Créer et mettre en vente
+            </button>
+        </form>
+
+        <div id="message"></div>
+        <div id="logs" class="logs"></div>
+    </div>
+
+    <script>
+        const userId = 1; // ID utilisateur fixe
+        
+        function log(message) {
+            console.log(message);
+            const timestamp = new Date().toLocaleTimeString();
+            document.getElementById('logs').textContent += `${timestamp}: ${message}\n`;
+            document.getElementById('logs').scrollTop = document.getElementById('logs').scrollHeight;
+        }
+        
+        document.getElementById('venteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const nom = document.getElementById('nom').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const prix = parseFloat(document.getElementById('prix').value);
+            
+            if (!nom || !description || !prix || prix < 100) {
+                showMessage('Veuillez remplir tous les champs correctement', 'error');
+                return;
+            }
+            
+            log(`🚗 Début vente express: ${nom} - ${prix}€`);
+            showMessage('Création et mise en vente...', 'loading');
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ En cours...';
+            
+            try {
+                // Étape 1: Créer le véhicule
+                log(`📝 Création du véhicule...`);
+                const vehiculeData = {
+                    nom: nom,
+                    description: description,
+                    rarete: "COMMUN",
+                    prix: prix,
+                    proprietaireId: userId,
+                    energy: 100,
+                    type: "NORMAL",
+                    avendre: false
+                };
+                
+                const createResponse = await fetch('/api/cartes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(vehiculeData)
+                });
+                
+                if (!createResponse.ok) {
+                    throw new Error('Erreur création véhicule');
+                }
+                
+                const newVehicule = await createResponse.json();
+                log(`✅ Véhicule créé avec ID: ${newVehicule.id}`);
+                
+                // Étape 2: Mettre en vente avec l'ancien endpoint qui marche
+                log(`💰 Mise en vente avec l'ancien système...`);
+                
+                const venteUrl = `/market/vente?carteId=${newVehicule.id}&utilisateurId=${userId}&prix=${prix}`;
+                log(`🔗 URL vente: ${venteUrl}`);
+                
+                const venteResponse = await fetch(venteUrl, {
+                    method: 'POST'
+                });
+                
+                log(`📥 Réponse vente: ${venteResponse.status}`);
+                
+                if (venteResponse.ok) {
+                    const result = await venteResponse.text();
+                    log(`✅ Vente réussie: ${result}`);
+                    
+                    showMessage(`🎉 Succès ! Votre ${nom} est en vente pour ${prix}€`, 'success');
+                    
+                    // Réinitialiser
+                    document.getElementById('venteForm').reset();
+                    
+                    // Aller au catalogue
+                    setTimeout(() => {
+                        if (confirm('Voir votre véhicule dans le catalogue ?')) {
+                            window.location.href = '/catalogue.html';
+                        }
+                    }, 2000);
+                    
+                } else {
+                    const error = await venteResponse.text();
+                    log(`❌ Erreur vente: ${error}`);
+                    showMessage(`Erreur mise en vente: ${error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`);
+                showMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Créer et mettre en vente';
+            }
+        });
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Vente Express chargée - utilise l\'ancien système qui marche');
+        });
+    </script>
+</body>
+</html>

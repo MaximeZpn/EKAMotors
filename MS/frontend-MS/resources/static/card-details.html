@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la Carte</title>
+    <link rel="stylesheet" href="/style/main.css">
+    <style>
+        .card-details {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .card-info {
+            display: grid;
+            gap: 20px;
+        }
+
+        .back-button {
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>CardGame</h2>
+        <nav>
+            <a href="/market.html">Marché</a>
+            <a href="/game.html">Jouer</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <button class="back-button" onclick="history.back()">Retour</button>
+        <div class="card-details">
+            <img id="cardImage" class="card-image" src="" alt="Image de la carte">
+            <div class="card-info">
+                <h2 id="cardName"></h2>
+                <p id="cardDescription"></p>
+                <p>Type: <span id="cardType"></span></p>
+                <p>Rareté: <span id="cardRarity"></span></p>
+                <p>Énergie: <span id="cardEnergy"></span></p>
+                <p>Prix: <span id="cardPrice"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cardId = urlParams.get('id');
+            
+            if (!cardId) {
+                window.location.href = '/market.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/cartes/${cardId}`);
+                if (!response.ok) {
+                    throw new Error('Carte non trouvée');
+                }
+                
+                const card = await response.json();
+                
+                // Mettre à jour les éléments de la page
+                document.getElementById('cardImage').src = card.imageUrl || 'https://img.freepik.com/free-vector/monster-cartoon-yellow-background-with-image-creepy-one-eyed-horned-creature-with-terrible-grin-vector-illustration_1284-75258.jpg?t=st=1745742334~exp=1745745934~hmac=5e9832da701c29f5ae2f9f16f26f94424f8d15f11131e96a0b09413665dffbf2&w=1380';
+                document.getElementById('cardName').textContent = card.nom;
+                document.getElementById('cardDescription').textContent = card.description || 'Aucune description disponible';
+                document.getElementById('cardType').textContent = card.type || 'NORMAL';
+                document.getElementById('cardRarity').textContent = card.rarete || 'COMMUN';
+                document.getElementById('cardEnergy').textContent = `${card.energy || 0}/100`;
+                document.getElementById('cardPrice').textContent = `${card.prix.toFixed(2)} €`;
+                
+                document.title = `${card.nom} - Détails de la Carte`;
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors du chargement des détails de la carte');
+            }
+        });
+    </script>
+</body>
+</html>

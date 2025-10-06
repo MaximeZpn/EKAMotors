@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendre un Véhicule - EKA Motors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .price-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .price-group input {
+            flex: 1;
+        }
+        .currency {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f8f9fa;
+            color: #333;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .preview h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .logs {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Vendre un Véhicule</h1>
+        <p class="subtitle">Créez une annonce pour votre véhicule</p>
+        
+        <div class="navigation">
+            <a href="/" class="nav-btn">🏠 Accueil</a>
+            <a href="/catalogue.html" class="nav-btn">🔍 Catalogue</a>
+        </div>
+
+        <form id="venteForm">
+            <div class="form-group">
+                <label for="nom">Nom du véhicule *</label>
+                <input type="text" id="nom" placeholder="Ex: BMW X5, Mercedes Class A..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" placeholder="Décrivez votre véhicule (année, kilométrage, état, équipements...)" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="rarete">Type de véhicule</label>
+                <select id="rarete">
+                    <option value="COMMUN">Citadine / Compacte</option>
+                    <option value="RARE">Berline / SUV</option>
+                    <option value="LEGENDAIRE">Sportive / Luxe</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="prix">Prix de vente *</label>
+                <div class="price-group">
+                    <input type="number" id="prix" placeholder="15000" min="100" step="100" required>
+                    <span class="currency">€</span>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                💰 Mettre en vente immédiatement
+            </button>
+        </form>
+
+        <div id="message"></div>
+        
+        <div id="preview" class="preview" style="display: none;">
+            <h3>Aperçu de votre annonce</h3>
+            <p><strong>Véhicule:</strong> <span id="previewNom">-</span></p>
+            <p><strong>Description:</strong> <span id="previewDesc">-</span></p>
+            <p><strong>Type:</strong> <span id="previewType">-</span></p>
+            <p><strong>Prix:</strong> <span id="previewPrix">-</span> €</p>
+        </div>
+
+        <div id="logs" class="logs"></div>
+    </div>
+
+    <script>
+        const userId = 1; // ID utilisateur fixe pour test
+        
+        // Fonction de log
+        function log(message) {
+            console.log(message);
+            const timestamp = new Date().toLocaleTimeString();
+            document.getElementById('logs').textContent += `${timestamp}: ${message}\n`;
+            document.getElementById('logs').scrollTop = document.getElementById('logs').scrollHeight;
+        }
+        
+        // Afficher l'aperçu en temps réel
+        function updatePreview() {
+            const nom = document.getElementById('nom').value;
+            const description = document.getElementById('description').value;
+            const rarete = document.getElementById('rarete').value;
+            const prix = document.getElementById('prix').value;
+            
+            if (nom && description && prix) {
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('previewNom').textContent = nom;
+                document.getElementById('previewDesc').textContent = description;
+                document.getElementById('previewType').textContent = rarete;
+                document.getElementById('previewPrix').textContent = prix;
+            } else {
+                document.getElementById('preview').style.display = 'none';
+            }
+        }
+        
+        // Écouter les changements pour l'aperçu
+        ['nom', 'description', 'rarete', 'prix'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePreview);
+        });
+        
+        // Gestion du formulaire
+        document.getElementById('venteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const nom = document.getElementById('nom').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const rarete = document.getElementById('rarete').value;
+            const prix = parseFloat(document.getElementById('prix').value);
+            
+            if (!nom || !description || !prix || prix < 100) {
+                showMessage('Veuillez remplir tous les champs correctement', 'error');
+                return;
+            }
+            
+            log(`🚗 Début création annonce: ${nom} - ${prix}€`);
+            showMessage('Création de votre annonce en cours...', 'loading');
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Création en cours...';
+            
+            try {
+                // Étape 1: Créer le véhicule
+                log(`📝 Étape 1: Création du véhicule`);
+                const vehiculeData = {
+                    nom: nom,
+                    description: description,
+                    rarete: rarete,
+                    prix: prix,
+                    proprietaireId: userId,
+                    energy: 100,
+                    type: "NORMAL",
+                    avendre: false
+                };
+                
+                log(`📤 Données véhicule: ${JSON.stringify(vehiculeData)}`);
+                
+                const createResponse = await fetch('/api/cartes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(vehiculeData)
+                });
+                
+                log(`📥 Réponse création véhicule: ${createResponse.status}`);
+                
+                if (!createResponse.ok) {
+                    const error = await createResponse.text();
+                    throw new Error(`Erreur création véhicule: ${error}`);
+                }
+                
+                const newVehicule = await createResponse.json();
+                log(`✅ Véhicule créé avec ID: ${newVehicule.id}`);
+                
+                // Attendre un peu pour la synchronisation des données
+                log(`⏳ Attente de 2 secondes pour la synchronisation...`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Vérifier que le véhicule est bien accessible
+                log(`🔍 Vérification que le véhicule ID ${newVehicule.id} existe...`);
+                const checkResponse = await fetch(`/api/cartes/${newVehicule.id}`);
+                log(`🔍 Vérification véhicule: ${checkResponse.status}`);
+                
+                if (!checkResponse.ok) {
+                    throw new Error(`Le véhicule créé n'est pas encore accessible (${checkResponse.status})`);
+                }
+                
+                // Étape 2: Créer l'offre de vente
+                log(`💰 Étape 2: Création de l'offre de vente`);
+                const offreData = {
+                    carteId: newVehicule.id,
+                    vendeurId: userId,
+                    prix: prix,
+                    active: true
+                };
+                
+                log(`📤 Données offre: ${JSON.stringify(offreData)}`);
+                
+                const offreResponse = await fetch('/api/market/offres', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(offreData)
+                });
+                
+                log(`📥 Réponse création offre: ${offreResponse.status}`);
+                
+                if (offreResponse.ok) {
+                    const offre = await offreResponse.json();
+                    log(`✅ Offre créée avec ID: ${offre.id}`);
+                    
+                    showMessage(`🎉 Succès ! Votre ${nom} est maintenant en vente pour ${prix}€`, 'success');
+                    
+                    // Réinitialiser le formulaire
+                    document.getElementById('venteForm').reset();
+                    document.getElementById('preview').style.display = 'none';
+                    
+                    // Proposer de voir le catalogue
+                    setTimeout(() => {
+                        if (confirm('Voulez-vous voir votre véhicule dans le catalogue ?')) {
+                            window.location.href = '/catalogue.html';
+                        }
+                    }, 2000);
+                    
+                } else {
+                    const error = await offreResponse.text();
+                    log(`❌ Erreur création offre: ${error}`);
+                    showMessage(`Véhicule créé mais erreur lors de la mise en vente: ${error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Erreur générale: ${error.message}`);
+                showMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '💰 Mettre en vente immédiatement';
+            }
+        });
+        
+        // Afficher un message
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.textContent = '';
+                    messageDiv.className = '';
+                }, 10000);
+            }
+        }
+        
+        // Log initial
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚗 Page de vente chargée - Prêt à créer une annonce');
+        });
+    </script>
+</body>
+</html>

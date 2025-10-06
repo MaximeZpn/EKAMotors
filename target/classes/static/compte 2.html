@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Compte</title>
+    <link rel="stylesheet" href="/style/compte.css">
+</head>
+<body>
+<div class="user-info">
+    <p>Bienvenue, <b id="surnom"></b></p>
+    <p>Email: <span id="email"></span></p>
+    <p>Solde: <span id="solde"></span> $</p>
+    <button onclick="deconnecter()">Se déconnecter</button>
+</div>
+
+<div class="modification-mdp">
+    <h3>Modifier mon mot de passe</h3>
+    <form id="formModifierMdp">
+        <label for="nouveauMotDePasse">Nouveau mot de passe</label>
+        <input type="password" id="nouveauMotDePasse" required>
+        <button type="submit">Modifier</button>
+    </form>
+</div>
+
+<script src="/js/compte.js"></script>
+</body>
+</html>

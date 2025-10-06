@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendre une Voiture - EKA Motors</title>
+  <script>
+    (async function() {
+      const resp = await fetch('/createCard.html');
+      if (resp.ok) {
+        let html = await resp.text();
+        html = html
+          .replace(/<title>[^<]*<\/title>/, '<title>Vendre une Voiture - EKA Motors<\/title>')
+          .replace(/CardGame/g, 'EKA Motors')
+          .replace(/Créer une Carte/g, 'Vendre une Voiture')
+          .replace(/Créer une nouvelle carte/g, 'Créer une annonce de voiture')
+          .replace(/Nom de la carte/g, 'Modèle de la voiture')
+          .replace(/Type de carte/g, 'Type de motorisation')
+          .replace(/Énergie:/g, 'Autonomie:')
+          .replace(/\/market\.html/g, '/catalogue.html');
+        document.open();
+        document.write(html);
+        document.close();
+      } else {
+        document.write('<p>Impossible de charger le formulaire de vente.</p>');
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>
+
+
+

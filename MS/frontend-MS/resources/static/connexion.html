@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion</title>
+  <link rel="stylesheet" href="/style/auth.css">
+</head>
+<body>
+<div class="container">
+  <h2>Connexion</h2>
+  <div id="message-container"></div>
+  <form id="formConnexion">
+    <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <button type="submit">Se connecter</button>
+  </form>
+  <p>Pas encore de compte ? <a href="/inscription.html">S'inscrire</a></p>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if coming from successful registration
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('registered') === 'true') {
+      const messageContainer = document.getElementById('message-container');
+      messageContainer.innerHTML = '<div class="success-message">Inscription réussie ! Vous pouvez maintenant vous connecter.</div>';
+    }
+  });
+
+  document.getElementById('formConnexion').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    const messageContainer = document.getElementById('message-container');
+    messageContainer.innerHTML = '';
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Store token in localStorage
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user_id', data.userId);
+        localStorage.setItem('username', data.username);
+        
+        // Redirect to main application
+        window.location.href = '/index.html';
+      } else {
+        messageContainer.innerHTML = '<div class="error-message">Nom d\'utilisateur ou mot de passe incorrect</div>';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      messageContainer.innerHTML = '<div class="error-message">Erreur de connexion au serveur</div>';
+    }
+  });
+</script>
+<script src="/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Market API</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; }
+    button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
+</head>
+<body>
+  <h1>Test Market API</h1>
+  
+  <div class="section">
+    <h2>1. Tester les cartes disponibles</h2>
+    <button onclick="testGetCartes()">GET /api/cartes</button>
+    <pre id="cartes-result"></pre>
+  </div>
+  
+  <div class="section">
+    <h2>2. Tester les offres actives</h2>
+    <button onclick="testGetActiveOffers()">GET /api/market/offres/actives</button>
+    <pre id="offers-result"></pre>
+  </div>
+  
+  <div class="section">
+    <h2>3. Créer une offre de test</h2>
+    <button onclick="createTestOffer()">POST /api/market/offres</button>
+    <pre id="create-result"></pre>
+  </div>
+  
+  <div class="section">
+    <h2>4. Test complet du catalogue</h2>
+    <button onclick="testFullCatalog()">Test complet</button>
+    <pre id="catalog-result"></pre>
+  </div>
+
+  <script>
+    async function testGetCartes() {
+      const result = document.getElementById('cartes-result');
+      result.textContent = 'Chargement...';
+      
+      try {
+        const response = await fetch('/api/cartes');
+        const data = await response.json();
+        result.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+        result.className = response.ok ? 'success' : 'error';
+      } catch (error) {
+        result.textContent = `Erreur: ${error.message}`;
+        result.className = 'error';
+      }
+    }
+    
+    async function testGetActiveOffers() {
+      const result = document.getElementById('offers-result');
+      result.textContent = 'Chargement...';
+      
+      try {
+        const response = await fetch('/api/market/offres/actives');
+        const data = await response.json();
+        result.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+        result.className = response.ok ? 'success' : 'error';
+      } catch (error) {
+        result.textContent = `Erreur: ${error.message}`;
+        result.className = 'error';
+      }
+    }
+    
+    async function createTestOffer() {
+      const result = document.getElementById('create-result');
+      result.textContent = 'Création en cours...';
+      
+      try {
+        const response = await fetch('/api/market/offres', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            carteId: 1,
+            vendeurId: 1,
+            prix: 15000,
+            active: true
+          })
+        });
+        
+        const data = await response.text();
+        result.textContent = `Status: ${response.status}\nResponse: ${data}`;
+        result.className = response.ok ? 'success' : 'error';
+      } catch (error) {
+        result.textContent = `Erreur: ${error.message}`;
+        result.className = 'error';
+      }
+    }
+    
+    async function testFullCatalog() {
+      const result = document.getElementById('catalog-result');
+      result.textContent = 'Test en cours...\n';
+      
+      try {
+        // 1. Tester les cartes
+        result.textContent += '1. Test cartes...\n';
+        const cartesResponse = await fetch('/api/cartes');
+        const cartes = await cartesResponse.json();
+        result.textContent += `   ✓ ${cartes.length} cartes trouvées\n`;
+        
+        // 2. Tester les offres
+        result.textContent += '2. Test offres actives...\n';
+        const offresResponse = await fetch('/api/market/offres/actives');
+        const offres = await offresResponse.json();
+        result.textContent += `   ✓ ${offres.length} offres actives\n`;
+        
+        // 3. Si pas d'offres, essayer d'en créer une
+        if (offres.length === 0) {
+          result.textContent += '3. Aucune offre, création d\'une offre test...\n';
+          const createResponse = await fetch('/api/market/offres', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              carteId: 1,
+              vendeurId: 1,
+              prix: 15000,
+              active: true
+            })
+          });
+          
+          if (createResponse.ok) {
+            result.textContent += '   ✓ Offre créée avec succès\n';
+            // Re-tester les offres
+            const newOffresResponse = await fetch('/api/market/offres/actives');
+            const newOffres = await newOffresResponse.json();
+            result.textContent += `   ✓ ${newOffres.length} offres actives maintenant\n`;
+          } else {
+            const errorText = await createResponse.text();
+            result.textContent += `   ✗ Erreur création offre: ${errorText}\n`;
+          }
+        }
+        
+        // 4. Tester l'accès aux détails des cartes pour chaque offre
+        result.textContent += '4. Test accès détails cartes...\n';
+        const finalOffresResponse = await fetch('/api/market/offres/actives');
+        const finalOffres = await finalOffresResponse.json();
+        
+        for (const offre of finalOffres) {
+          const carteResponse = await fetch(`/api/vehicules/${offre.carteId}`);
+          if (carteResponse.ok) {
+            const carte = await carteResponse.json();
+            result.textContent += `   ✓ Carte ${offre.carteId}: ${carte.nom}\n`;
+          } else {
+            result.textContent += `   ✗ Erreur carte ${offre.carteId}: ${carteResponse.status}\n`;
+          }
+        }
+        
+        result.className = 'success';
+        result.textContent += '\nTest terminé avec succès!';
+        
+      } catch (error) {
+        result.textContent += `\nErreur: ${error.message}`;
+        result.className = 'error';
+      }
+    }
+  </script>
+</body>
+</html>

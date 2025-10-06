@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vente de véhicules</title>
+    <link rel="stylesheet" href="/style/sell.css">
+</head>
+<body>
+
+<!-- Infos utilisateur + Déconnexion -->
+<div class="user-info">
+    <span id="solde">0 $</span>
+    <span>👤 <b id="username">Utilisateur</b></span>
+    <button onclick="deconnecter()">Déconnexion</button>
+</div>
+
+<div class="container">
+    <h2>Vente de véhicules</h2>
+
+    <!-- Bouton de retour -->
+    <button id="retourAccueil">⬅ Retour</button>
+
+    <div class="content">
+        <!-- Tableau des véhicules -->
+        <table id="cartesTable">
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Rareté</th>
+                <th>Niveau</th>
+                <th>Statut</th> <!-- ✅ Nouvelle colonne pour voir si le véhicule est en vente -->
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Les véhicules seront chargés ici dynamiquement -->
+            </tbody>
+        </table>
+
+        <!-- Détails du véhicule sélectionné -->
+        <div id="detailsCarte">
+            <h3>Détails du véhicule</h3>
+            <img id="imageCarte" src="/images/default-card.png" alt="Aucun véhicule sélectionné">
+            <p><b>Nom :</b> <span id="nomCarte">-</span></p>
+            <p><b>Description :</b> <span id="descriptionCarte">-</span></p>
+            <p><b>Rareté :</b> <span id="rareteCarte">-</span></p>
+            <p><b>Niveau :</b> <span id="niveauCarte">-</span></p>
+            <button id="vendreCarte" disabled>Vendre</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/sell.js"></script>
+<script src="/js/home.js"></script> <!-- Gestion utilisateur & déconnexion -->
+</body>
+</html>

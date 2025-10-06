@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button {
+            padding: 8px;
+            width: 100%;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Carte API Tester</h1>
+    
+    <div class="card">
+        <h2>Get All Cartes</h2>
+        <button onclick="getAllCartes()">Get All</button>
+        <h3>Response:</h3>
+        <pre id="getAllResponse">No data</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Add New Carte</h2>
+        <div class="form-group">
+            <label for="nom">Nom:</label>
+            <input type="text" id="nom">
+        </div>
+        <div class="form-group">
+            <label for="prix">Prix:</label>
+            <input type="number" id="prix">
+        </div>
+        <div class="form-group">
+            <label for="aVendre">À Vendre:</label>
+            <input type="checkbox" id="aVendre">
+        </div>
+        <div class="form-group">
+            <label for="proprietaireId">Proprietaire ID:</label>
+            <input type="number" id="proprietaireId">
+        </div>
+        <button onclick="addCarte()">Add Carte</button>
+        <h3>Response:</h3>
+        <pre id="addResponse">No data</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Get Carte by ID</h2>
+        <div class="form-group">
+            <label for="getById">Carte ID:</label>
+            <input type="number" id="getById">
+        </div>
+        <button onclick="getCarteById()">Get Carte</button>
+        <h3>Response:</h3>
+        <pre id="getByIdResponse">No data</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Delete Carte</h2>
+        <div class="form-group">
+            <label for="deleteId">Carte ID:</label>
+            <input type="number" id="deleteId">
+        </div>
+        <button onclick="deleteCarte()">Delete Carte</button>
+        <h3>Response:</h3>
+        <pre id="deleteResponse">No data</pre>
+    </div>
+
+    <script>
+        const apiUrl = '/api/cartes';
+        
+        async function getAllCartes() {
+            try {
+                const response = await fetch(apiUrl + '/');
+                const data = await response.json();
+                document.getElementById('getAllResponse').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('getAllResponse').textContent = error;
+            }
+        }
+        
+        async function addCarte() {
+            try {
+                const carte = {
+                    nom: document.getElementById('nom').value,
+                    prix: parseFloat(document.getElementById('prix').value),
+                    aVendre: document.getElementById('aVendre').checked,
+                    proprietaireId: parseInt(document.getElementById('proprietaireId').value)
+                };
+                
+                const response = await fetch(apiUrl + '/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(carte)
+                });
+                
+                const data = await response.json();
+                document.getElementById('addResponse').textContent = JSON.stringify(data, null, 2);
+                // Refresh the list
+                getAllCartes();
+            } catch (error) {
+                document.getElementById('addResponse').textContent = error;
+            }
+        }
+        
+        async function getCarteById() {
+            try {
+                const id = document.getElementById('getById').value;
+                const response = await fetch(`${apiUrl}/${id}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('getByIdResponse').textContent = JSON.stringify(data, null, 2);
+                } else {
+                    document.getElementById('getByIdResponse').textContent = `Error: ${response.status} - ${response.statusText}`;
+                }
+            } catch (error) {
+                document.getElementById('getByIdResponse').textContent = error;
+            }
+        }
+        
+        async function deleteCarte() {
+            try {
+                const id = document.getElementById('deleteId').value;
+                const response = await fetch(`${apiUrl}/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                document.getElementById('deleteResponse').textContent = `Status: ${response.status} - ${response.statusText}`;
+                // Refresh the list
+                getAllCartes();
+            } catch (error) {
+                document.getElementById('deleteResponse').textContent = error;
+            }
+        }
+        
+        // Load all cartes on page load
+        document.addEventListener('DOMContentLoaded', getAllCartes);
+    </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #4a90e2;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+    button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    pre {
+      background-color: #f8f8f8;
+      padding: 10px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .success {
+      color: #155724;
+      background-color: #d4edda;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .error {
+      color: #721c24;
+      background-color: #f8d7da;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .tabs {
+      margin-bottom: 15px;
+    }
+    .tab {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #f1f1f1;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+    }
+    .tab.active {
+      background-color: #4a90e2;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 0 4px 4px 4px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+  <script src="/js/api-test.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>API Tester</h1>
+    <p>Cet outil permet de tester les API du système et diagnostiquer les problèmes.</p>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="create-card">Créer une carte</div>
+      <div class="tab" data-tab="get-cards">Récupérer les cartes</div>
+      <div class="tab" data-tab="full-test">Test complet</div>
+    </div>
+    
+    <div id="create-card" class="tab-content active">
+      <h2>Créer une nouvelle carte</h2>
+      <div class="form-group">
+        <label for="card-name">Nom de la carte:</label>
+        <input type="text" id="card-name" value="Carte de test">
+      </div>
+      <div class="form-group">
+        <label for="card-description">Description:</label>
+        <textarea id="card-description">Carte créée par l'outil de test</textarea>
+      </div>
+      <div class="form-group">
+        <label for="card-rarity">Rareté:</label>
+        <select id="card-rarity">
+          <option value="COMMUN">Commun</option>
+          <option value="RARE">Rare</option>
+          <option value="EPIQUE">Épique</option>
+          <option value="LEGENDAIRE">Légendaire</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="card-price">Prix:</label>
+        <input type="number" id="card-price" value="10" step="0.01">
+      </div>
+      <div class="form-group">
+        <label for="card-owner">ID du propriétaire:</label>
+        <input type="number" id="card-owner" value="">
+      </div>
+      <div class="form-group">
+        <label for="card-type">Type:</label>
+        <select id="card-type">
+          <option value="NORMAL">Normal</option>
+          <option value="FIRE">Feu</option>
+          <option value="WATER">Eau</option>
+          <option value="EARTH">Terre</option>
+          <option value="AIR">Air</option>
+        </select>
+      </div>
+      <button id="create-card-btn">Créer la carte</button>
+      <div id="create-result"></div>
+    </div>
+    
+    <div id="get-cards" class="tab-content">
+      <h2>Récupérer les cartes d'un utilisateur</h2>
+      <div class="form-group">
+        <label for="user-id">ID de l'utilisateur:</label>
+        <input type="number" id="user-id" value="">
+      </div>
+      <button id="get-cards-btn">Récupérer les cartes</button>
+      <div id="get-result"></div>
+    </div>
+    
+    <div id="full-test" class="tab-content">
+      <h2>Exécuter un test complet</h2>
+      <p>Ce test va créer une carte puis vérifier qu'elle apparaît dans la liste des cartes de l'utilisateur.</p>
+      <div class="form-group">
+        <label for="test-user-id">ID de l'utilisateur:</label>
+        <input type="number" id="test-user-id" value="">
+      </div>
+      <button id="run-test-btn">Lancer le test</button>
+      <div id="test-result"></div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set default user ID from localStorage
+      const userId = localStorage.getItem('user_id') || '';
+      document.getElementById('card-owner').value = userId;
+      document.getElementById('user-id').value = userId;
+      document.getElementById('test-user-id').value = userId;
+      
+      // Tab switching
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          // Remove active class from all tabs
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          
+          // Add active class to clicked tab
+          this.classList.add('active');
+          document.getElementById(this.dataset.tab).classList.add('active');
+        });
+      });
+      
+      // Create card
+      document.getElementById('create-card-btn').addEventListener('click', async function() {
+        const resultDiv = document.getElementById('create-result');
+        resultDiv.innerHTML = '<p>Création en cours...</p>';
+        
+        try {
+          const cardData = {
+            nom: document.getElementById('card-name').value,
+            description: document.getElementById('card-description').value,
+            rarete: document.getElementById('card-rarity').value,
+            prix: parseFloat(document.getElementById('card-price').value),
+            proprietaireId: parseInt(document.getElementById('card-owner').value),
+            type: document.getElementById('card-type').value,
+            energy: 100,
+            aVendre: false
+          };
+          
+          const card = await ApiTester.testCreateCard(cardData);
+          
+          if (card) {
+            resultDiv.innerHTML = `
+              <div class="success">
+                <h3>Carte créée avec succès!</h3>
+                <p>ID: ${card.id}</p>
+              </div>
+              <h4>Réponse complète:</h4>
+              <pre>${JSON.stringify(card, null, 2)}</pre>
+            `;
+          } else {
+            resultDiv.innerHTML = `
+              <div class="error">
+                <h3>Échec de la création</h3>
+                <p>Regardez les détails dans la console</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `
+            <div class="error">
+              <h3>Erreur</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        }
+      });
+      
+      // Get cards
+      document.getElementById('get-cards-btn').addEventListener('click', async function() {
+        const resultDiv = document.getElementById('get-result');
+        resultDiv.innerHTML = '<p>Récupération en cours...</p>';
+        
+        try {
+          const userId = document.getElementById('user-id').value;
+          const cards = await ApiTester.testGetCards(userId);
+          
+          if (cards) {
+            resultDiv.innerHTML = `
+              <div class="success">
+                <h3>${cards.length} cartes trouvées</h3>
+              </div>
+              <h4>Réponse complète:</h4>
+              <pre>${JSON.stringify(cards, null, 2)}</pre>
+            `;
+          } else {
+            resultDiv.innerHTML = `
+              <div class="error">
+                <h3>Échec de la récupération</h3>
+                <p>Regardez les détails dans la console</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `
+            <div class="error">
+              <h3>Erreur</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        }
+      });
+      
+      // Run full test
+      document.getElementById('run-test-btn').addEventListener('click', async function() {
+        const resultDiv = document.getElementById('test-result');
+        resultDiv.innerHTML = '<p>Test en cours, veuillez patienter...</p>';
+        
+        try {
+          const userId = document.getElementById('test-user-id').value;
+          const result = await ApiTester.runFullTest(userId);
+          
+          if (result) {
+            resultDiv.innerHTML = `
+              <div class="${result.success ? 'success' : 'error'}">
+                <h3>Résultats du test</h3>
+                <p>Cartes initiales: ${result.initialCount}</p>
+                <p>Cartes après création: ${result.updatedCount}</p>
+                <p>Carte vérifiable directement: ${result.verifiedCard ? 'Oui' : 'Non'}</p>
+                <p>Carte présente dans la liste: ${result.foundInList ? 'Oui' : 'Non'}</p>
+                <p><strong>Conclusion: ${result.success ? 'SUCCÈS' : 'ÉCHEC'}</strong></p>
+              </div>
+              <h4>Détails de la carte créée:</h4>
+              <pre>${JSON.stringify(result.createdCard, null, 2)}</pre>
+            `;
+          } else {
+            resultDiv.innerHTML = `
+              <div class="error">
+                <h3>Échec du test</h3>
+                <p>Regardez les détails dans la console</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `
+            <div class="error">
+              <h3>Erreur</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

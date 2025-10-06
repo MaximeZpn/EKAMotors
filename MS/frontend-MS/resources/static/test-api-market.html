@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test API Market Direct</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px; margin: 5px; cursor: pointer; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Direct API Market</h1>
+    
+    <button onclick="testCreateOffer()">Test Création Offre Simple</button>
+    <button onclick="testGetOffers()">Test Liste Offres</button>
+    <button onclick="clearLogs()">Effacer Logs</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function log(message, type = '') {
+            const div = document.getElementById('result');
+            const p = document.createElement('pre');
+            p.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            p.className = type;
+            div.appendChild(p);
+        }
+        
+        function clearLogs() {
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        async function testCreateOffer() {
+            log('🧪 Test création offre direct...');
+            
+            const testOffer = {
+                carteId: 999,  // ID fictif pour test
+                vendeurId: 1,
+                prix: 1500,
+                active: true
+            };
+            
+            try {
+                const response = await fetch('/api/market/offres', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testOffer)
+                });
+                
+                const result = await response.text();
+                
+                if (response.ok) {
+                    log('✅ Succès création offre: ' + result, 'success');
+                } else {
+                    log('❌ Erreur création offre: ' + result, 'error');
+                }
+            } catch (error) {
+                log('❌ Erreur réseau: ' + error.message, 'error');
+            }
+        }
+        
+        async function testGetOffers() {
+            log('🔍 Test récupération offres...');
+            
+            try {
+                const response = await fetch('/api/market/offres/actives');
+                const offers = await response.json();
+                
+                log('📋 Offres actives: ' + JSON.stringify(offers, null, 2), 'success');
+                log('📊 Nombre d\'offres: ' + offers.length);
+                
+            } catch (error) {
+                log('❌ Erreur: ' + error.message, 'error');
+            }
+        }
+        
+        // Test automatique au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Page de test chargée');
+            setTimeout(testGetOffers, 1000);
+        });
+    </script>
+</body>
+</html>

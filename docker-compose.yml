@@ -1,0 +1,211 @@
+services:
+  auth-service:
+    build:
+      context: ./MS/auth-MS
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-auth:3306/auth_db?allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SERVER_ADDRESS=0.0.0.0
+      - SPRING_MVC_STATIC-PATH-PATTERN=/**
+      - SPRING_WEB_RESOURCES_STATIC-LOCATIONS=classpath:/static/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+    networks:
+      - microservice-network
+    depends_on:
+      - mysql-auth
+    volumes:
+      - ./MS/auth-MS/src/main/resources/static:/app/src/main/resources/static
+
+  mysql-auth:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3308:3306"  # Different port to avoid conflict
+    volumes:
+      - mysql-auth-data:/var/lib/mysql
+    command: --authentication-policy=mysql_native_password
+    networks:
+      - microservice-network
+
+  user-service:
+    build:
+      context: ./MS/user-MS
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-user:3306/user_db?allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SERVER_ADDRESS=0.0.0.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+    networks:
+      - microservice-network
+    depends_on:
+      - mysql-user
+
+  mysql-user:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_db
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3307:3306"  # Different port to avoid conflict with mysql-carte
+    volumes:
+      - mysql-user-data:/var/lib/mysql
+    command: --authentication-policy=mysql_native_password
+    networks:
+      - microservice-network
+
+  market-service:
+    build:
+      context: ./MS/market-MS
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-market:3306/market_db?allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SERVER_ADDRESS=0.0.0.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+    networks:
+      - microservice-network
+    depends_on:
+      - mysql-market
+
+  mysql-market:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: market_db
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3309:3306"  # Different port to avoid conflict
+    volumes:
+      - mysql-market-data:/var/lib/mysql
+    command: --authentication-policy=mysql_native_password
+    networks:
+      - microservice-network
+
+  vehicule-service:
+    build:
+      context: ./MS/carte-MS
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-vehicule:3306/vehicule_db?allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SERVER_ADDRESS=0.0.0.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+    networks:
+      - microservice-network
+    depends_on:
+      - mysql-vehicule
+
+  mysql-vehicule:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vehicule_db
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-vehicule-data:/var/lib/mysql
+    command: --authentication-policy=mysql_native_password
+    networks:
+      - microservice-network
+
+  game-service:
+    build:
+      context: ./MS/game-MS
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-game:3306/game_db?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SERVER_ADDRESS=0.0.0.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+    networks:
+      - microservice-network
+    depends_on:
+      - mysql-game
+      - vehicule-service
+      - user-service
+
+  mysql-game:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: game_db
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3310:3306"  # Different port to avoid conflict
+    volumes:
+      - mysql-game-data:/var/lib/mysql
+    command: --authentication-policy=mysql_native_password
+    networks:
+      - microservice-network
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8888:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=mysql
+      - ADMINER_DESIGN=nette
+    networks:
+      - microservice-network
+    depends_on:
+      - mysql-vehicule
+      - mysql-user
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./MS/frontend-MS/resources/static:/usr/share/nginx/html:ro
+    depends_on:
+      - vehicule-service
+      - user-service
+      - market-service
+      - auth-service
+    networks:
+      - microservice-network
+
+networks:
+  microservice-network:
+    driver: bridge
+
+volumes:
+  mysql-vehicule-data:
+  mysql-user-data:
+  mysql-market-data:
+  mysql-auth-data:
+  mysql-game-data:

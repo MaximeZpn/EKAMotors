@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EKA Motors - Catalogue</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    nav a {
+      margin-left: 15px;
+      text-decoration: none;
+      color: #4a90e2;
+      font-weight: bold;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .section {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      background: white;
+    }
+    .card-header {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .card-price {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    .card-seller {
+      color: #777;
+      font-size: 14px;
+    }
+    button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #357abD;
+    }
+    .hide {
+      display: none;
+    }
+    .transaction {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-left: 3px solid #4a90e2;
+      background-color: #f9f9f9;
+    }
+    .user-balance {
+      background-color: #2ecc71;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      margin-left: 10px;
+      font-weight: bold;
+    }
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .own-offer {
+      border-left: 4px solid #3498db;
+    }
+    .card-seller {
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+    .cancel-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .error-message, .success-message {
+      padding: 10px;
+      margin: 10px auto;
+      border-radius: 4px;
+      max-width: 800px;
+      text-align: center;
+      transition: opacity 0.5s ease;
+    }
+    /* Improved message styling */
+    .error-message, .success-message {
+      padding: 15px;
+      margin: 15px auto;
+      border-radius: 6px;
+      max-width: 800px;
+      text-align: center;
+      transition: all 0.5s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    
+    /* Debug console styling */
+    #debug-console {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-height: 200px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #0f0;
+      font-family: monospace;
+      font-size: 12px;
+      overflow-y: auto;
+      z-index: 1000;
+      padding: 10px;
+      display: none;
+    }
+    
+    #debug-console.active {
+      display: block;
+    }
+    
+    #debug-toggle {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: #333;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      z-index: 1001;
+      cursor: pointer;
+    }
+    
+    .debug-line {
+      margin: 2px 0;
+      padding: 2px 0;
+      border-bottom: 1px solid #333;
+    }
+    
+    .debug-error {
+      color: #ff4d4d;
+    }
+    
+    .debug-warning {
+      color: #ffcc00;
+    }
+    
+    .debug-success {
+      color: #33cc33;
+    }
+  </style>
+  <script>
+    // Load auth-check.js before any other scripts
+    document.write('<script src="/js/auth-check.js"><\/script>');
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Catalogue de Voitures</h1>
+    <nav>
+      <a href="/index.html">Accueil</a>
+      <span id="username-display"></span>
+      <span id="user-balance" class="user-balance">Solde: 0.00 €</span>
+      <button id="logout-btn" class="button">Déconnexion</button>
+    </nav>
+  </header>
+  
+  <div id="message-container"></div>
+  
+  <div class="container">
+    <div class="section">
+      <h2>Voitures disponibles</h2>
+      <div id="offres" class="card-grid">
+        <div class="loading">Chargement des offres...</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Mes commandes</h2>
+      <div id="transactions">
+        <div class="loading">Chargement des transactions...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for creating offers -->
+  <div id="createOfferModal" class="hide">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Créer une offre de vente</h2>
+      <form id="offerForm">
+        <input type="hidden" id="carteId">
+        <div class="form-group">
+          <label for="prix">Prix:</label>
+          <input type="number" id="prix" step="0.01" min="0" required>
+        </div>
+        <button type="submit">Publier l'offre</button>
+      </form>
+    </div>
+  </div>
+  
+  <div id="debug-console"></div>
+  <button id="debug-toggle">Debug</button>
+
+  <script>
+    // Current user ID - get from localStorage
+    const currentUserId = localStorage.getItem('user_id') || 1;
+    let userBalance = 0;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check authentication first
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        window.location.href = '/connexion.html';
+        return;
+      }
+      
+      // Load user data (including balance)
+      loadUserData();
+      
+      // Load active offers
+      loadActiveOffers();
+      
+      // Load user's transactions
+      loadUserTransactions(currentUserId);
+    });
+    
+    // Debug utilities
+    const DEBUG = {
+      enabled: true,
+      console: document.getElementById('debug-console'),
+      maxLines: 100,
+      lines: [],
+      
+      log: function(message, type = 'info') {
+        if (!this.enabled) return;
+        
+        console.log(message); // Also log to browser console
+        
+        // Create formatted timestamp
+        const now = new Date();
+        const timestamp = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+        
+        // Format the message for display
+        let formattedMsg = `[${timestamp}] ${message}`;
+        
+        // Add to lines array
+        this.lines.push({ text: formattedMsg, type: type });
+        
+        // Trim if too many lines
+        if (this.lines.length > this.maxLines) {
+          this.lines = this.lines.slice(-this.maxLines);
+        }
+        
+        // Update display if console exists
+        this.updateDisplay();
+      },
+      
+      error: function(message) {
+        this.log(message, 'error');
+      },
+      
+      warn: function(message) {
+        this.log(message, 'warning');
+      },
+      
+      success: function(message) {
+        this.log(message, 'success');
+      },
+      
+      clear: function() {
+        this.lines = [];
+        this.updateDisplay();
+      },
+      
+      updateDisplay: function() {
+        if (!this.console) return;
+        
+        this.console.innerHTML = this.lines.map(line => 
+          `<div class="debug-line debug-${line.type}">${line.text}</div>`
+        ).join('');
+        
+        // Auto-scroll to bottom
+        this.console.scrollTop = this.console.scrollHeight;
+      },
+      
+      toggle: function() {
+        const console = document.getElementById('debug-console');
+        if (!console) return;
+        
+        console.classList.toggle('active');
+      }
+    };
+    
+    // Initialize debug toggle button
+    document.getElementById('debug-toggle').addEventListener('click', function() {
+      DEBUG.toggle();
+    });
+    
+    // Enhanced fetch with debugging
+    async function debugFetch(url, options = {}) {
+      DEBUG.log(`Fetching: ${url} (${options.method || 'GET'})`);
+      try {
+        const startTime = performance.now();
+        const response = await fetch(url, options);
+        const endTime = performance.now();
+        const duration = Math.round(endTime - startTime);
+        
+        if (response.ok) {
+          DEBUG.success(`Response OK (${response.status}) from ${url} in ${duration}ms`);
+        } else {
+          DEBUG.error(`Response Error (${response.status}) from ${url} in ${duration}ms`);
+          
+          // Try to get error details
+          try {
+            const errorText = await response.clone().text();
+            DEBUG.error(`Error details: ${errorText}`);
+          } catch(e) {
+            DEBUG.error(`Could not read error details: ${e.message}`);
+          }
+        }
+        
+        return response;
+      } catch (error) {
+        DEBUG.error(`Network error for ${url}: ${error.message}`);
+        throw error;
+      }
+    }
+    
+    // Modify existing functions to use the debugFetch
+    
+    async function loadUserData() {
+      try {
+        DEBUG.log(`Loading user data for ID: ${currentUserId}`);
+        let response = await debugFetch(`/api/utilisateurs/${currentUserId}`);
+        
+        if (!response.ok) {
+          DEBUG.error(`Failed to load user data. Status: ${response.status}`);
+          
+          // Create a placeholder user and then retry fetching
+          DEBUG.log(`Attempting to create placeholder user for ID: ${currentUserId}`);
+          const created = await createPlaceholderUser(currentUserId);
+          
+          if (created) {
+            DEBUG.log(`Retrying to fetch user data after creation`);
+            response = await debugFetch(`/api/utilisateurs/${currentUserId}`);
+          }
+        }
+        
+        if (response.ok) {
+          const userData = await response.json();
+          DEBUG.log(`User data retrieved: ${JSON.stringify(userData)}`);
+          
+          // Add user balance to the header
+          userBalance = userData.solde || 0;
+          DEBUG.log(`User balance set to: ${userBalance}`);
+          
+          const usernameDisplay = document.getElementById('username-display');
+          const userBalanceElement = document.getElementById('user-balance');
+          
+          if (usernameDisplay) {
+            usernameDisplay.textContent = userData.username;
+            DEBUG.log(`Username display updated: ${userData.username}`);
+          }
+          
+          if (userBalanceElement) {
+            userBalanceElement.textContent = `Solde: ${userBalance.toFixed(2)} €`;
+            DEBUG.log(`Balance display updated: ${userBalance.toFixed(2)}`);
+          }
+        } else {
+          DEBUG.error(`Failed to load user data. Status: ${response.status}`);
+          
+          // Fallback: try to create user profile if missing
+          DEBUG.log(`Attempting to create placeholder user for ID: ${currentUserId}`);
+          await createPlaceholderUser(currentUserId);
+          
+          // Still show username from localStorage as fallback
+          const username = localStorage.getItem('username') || "Utilisateur";
+          DEBUG.log(`Using fallback username: ${username}`);
+          
+          const usernameDisplay = document.getElementById('username-display');
+          if (usernameDisplay) {
+            usernameDisplay.textContent = username;
+          }
+        }
+      } catch (error) {
+        DEBUG.error(`Error in loadUserData: ${error.message}`);
+      }
+    }
+    
+    async function createPlaceholderUser(userId) {
+      try {
+        const username = localStorage.getItem('username') || `User-${userId}`;
+        const email = `user${userId}@example.com`;
+        
+        DEBUG.log(`Creating placeholder user: ${username} (${email})`);
+        
+        // First attempt with the user service directly
+        const response = await debugFetch('/api/utilisateurs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: username,
+            email: email
+          })
+        });
+        
+        if (response.ok) {
+          DEBUG.success(`Placeholder user created successfully via API`);
+          
+          // Now verify the user was actually created by fetching it
+          const verifyResponse = await debugFetch(`/api/utilisateurs/${userId}`);
+          if (verifyResponse.ok) {
+            DEBUG.success(`User ${userId} verified as created`);
+            return true;
+          } else {
+            DEBUG.warn(`User was reportedly created but cannot be fetched, trying alternative method`);
+            
+            // Try another approach - direct initialization with balance
+            return await initializeUserWithBalance(userId, username, email);
+          }
+        } else {
+          DEBUG.error(`Failed to create placeholder user via standard API`);
+          return await initializeUserWithBalance(userId, username, email);
+        }
+      } catch (error) {
+        DEBUG.error(`Error creating placeholder user: ${error.message}`);
+        return false;
+      }
+    }
+    
+    async function initializeUserWithBalance(userId, username, email) {
+      try {
+        DEBUG.log(`Attempting direct user initialization with balance for user ${userId}`);
+        
+        // Direct request to update balance which will auto-create the user
+        const initResponse = await debugFetch(`/api/utilisateurs/${userId}/solde?montant=100.0`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (initResponse.ok) {
+          DEBUG.success(`User ${userId} initialized with balance via direct method`);
+          return true;
+        } else {
+          DEBUG.error(`Failed to initialize user ${userId} with balance`);
+          return false;
+        }
+      } catch (error) {
+        DEBUG.error(`Error in direct user initialization: ${error.message}`);
+        return false;
+      }
+    }
+    
+    async function loadActiveOffers() {
+      const offresContainer = document.getElementById('offres');
+      
+      try {
+        const response = await debugFetch(`/api/market/offres/actives`);
+        
+        if (response.ok) {
+          const offres = await response.json();
+          
+          if (offres.length === 0) {
+            offresContainer.innerHTML = '<p>Aucune offre disponible actuellement</p>';
+            return;
+          }
+          
+          DEBUG.log(`Active offers loaded: ${offres.length}`);
+          
+          // Clear container
+          offresContainer.innerHTML = '';
+          
+          let displayedOffers = 0;
+          
+          // For each offer, get card details
+          for (const offre of offres) {
+            try {
+              const carteResponse = await debugFetch(`/api/vehicules/${offre.carteId}`);
+              
+              if (carteResponse.ok) {
+                const carte = await carteResponse.json();
+                
+                // Fetch seller username with better error handling
+                let sellerName = `Vendeur #${offre.vendeurId}`;
+                try {
+                  const sellerResponse = await debugFetch(`/api/utilisateurs/${offre.vendeurId}`);
+                  if (sellerResponse.ok) {
+                    const seller = await sellerResponse.json();
+                    sellerName = seller.username;
+                  } else {
+                    DEBUG.warn(`Could not fetch seller #${offre.vendeurId}, using default name`);
+                  }
+                } catch (e) {
+                  DEBUG.error(`Could not fetch seller name: ${e.message}`);
+                }
+                
+                // Show all offers, including user's own offers (but mark them)
+                const isUserOwnOffer = offre.vendeurId === parseInt(currentUserId);
+                
+                const offreElement = document.createElement('div');
+                offreElement.className = 'card' + (isUserOwnOffer ? ' own-offer' : '');
+                offreElement.innerHTML = `
+                  <div class="card-header">${carte.nom || 'Voiture'}</div>
+                  <div class="card-price">${offre.prix} €</div>
+                  <div class="card-seller">${isUserOwnOffer ? 'Votre annonce' : 'Vendeur: ' + sellerName}</div>
+                  ${!isUserOwnOffer ? 
+                    `<button data-offre-id="${offre.id}" class="acheter-btn">Ajouter au panier</button>` :
+                    `<button data-offre-id="${offre.id}" class="cancel-btn">Retirer l'annonce</button>`
+                  }
+                `;
+                
+                offresContainer.appendChild(offreElement);
+                displayedOffers++;
+              }
+            } catch (error) {
+              DEBUG.error(`Error fetching card details: ${error.message}`);
+            }
+          }
+          
+          if (displayedOffers === 0) {
+            offresContainer.innerHTML = '<p>Aucune offre disponible actuellement</p>';
+            return;
+          }
+          
+          // Add event listeners to buy buttons
+          document.querySelectorAll('.acheter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const offreId = this.getAttribute('data-offre-id');
+              acheterCarte(offreId, currentUserId);
+            });
+          });
+          
+          // Add event listeners to cancel buttons
+          document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const offreId = this.getAttribute('data-offre-id');
+              cancelOffer(offreId);
+            });
+          });
+          
+        } else {
+          offresContainer.innerHTML = '<p>Erreur lors du chargement des offres</p>';
+        }
+      } catch (error) {
+        DEBUG.error(`Error loading active offers: ${error.message}`);
+        offresContainer.innerHTML = '<p>Erreur lors du chargement des offres</p>';
+      }
+    }
+    
+    async function loadUserTransactions(userId) {
+      const transactionsContainer = document.getElementById('transactions');
+      
+      try {
+        // Load both buyer and seller transactions
+        const [buyerResponse, sellerResponse] = await Promise.all([
+          debugFetch(`/api/market/transactions/acheteur/${userId}`),
+          debugFetch(`/api/market/transactions/vendeur/${userId}`)
+        ]);
+        
+        const transactions = [];
+        
+        if (buyerResponse.ok) {
+          const buyerTransactions = await buyerResponse.json();
+          transactions.push(...buyerTransactions.map(t => ({...t, type: 'achat'})));
+        }
+        
+        if (sellerResponse.ok) {
+          const sellerTransactions = await sellerResponse.json();
+          transactions.push(...sellerTransactions.map(t => ({...t, type: 'vente'})));
+        }
+        
+        // Sort by date (newest first)
+        transactions.sort((a, b) => new Date(b.dateTransaction) - new Date(a.dateTransaction));
+        
+        if (transactions.length === 0) {
+          transactionsContainer.innerHTML = '<p>Aucune transaction trouvée</p>';
+          return;
+        }
+        
+        // Clear container
+        transactionsContainer.innerHTML = '';
+        
+        // Display each transaction
+        for (const transaction of transactions) {
+          const transactionElement = document.createElement('div');
+          transactionElement.className = 'transaction';
+          
+          // Get card details
+          try {
+            const carteResponse = await debugFetch(`/api/vehicules/${transaction.carteId}`);
+            
+            if (carteResponse.ok) {
+              const carte = await carteResponse.json();
+              
+              transactionElement.innerHTML = `
+                <div><strong>Type:</strong> ${transaction.type === 'achat' ? 'Achat' : 'Vente'}</div>
+                <div><strong>Carte:</strong> ${carte.nom}</div>
+                <div><strong>Prix:</strong> ${transaction.prix} €</div>
+                <div><strong>Date:</strong> ${new Date(transaction.dateTransaction).toLocaleString()}</div>
+                <div><strong>${transaction.type === 'achat' ? 'Vendeur' : 'Acheteur'} ID:</strong> 
+                  ${transaction.type === 'achat' ? transaction.vendeurId : transaction.acheteurId}</div>
+              `;
+            } else {
+              transactionElement.innerHTML = `
+                <div><strong>Type:</strong> ${transaction.type === 'achat' ? 'Achat' : 'Vente'}</div>
+                <div><strong>Carte ID:</strong> ${transaction.carteId}</div>
+                <div><strong>Prix:</strong> ${transaction.prix} €</div>
+                <div><strong>Date:</strong> ${new Date(transaction.dateTransaction).toLocaleString()}</div>
+                <div><strong>${transaction.type === 'achat' ? 'Vendeur' : 'Acheteur'} ID:</strong> 
+                  ${transaction.type === 'achat' ? transaction.vendeurId : transaction.acheteurId}</div>
+              `;
+            }
+            
+            transactionsContainer.appendChild(transactionElement);
+          } catch (error) {
+            DEBUG.error(`Error fetching card details: ${error.message}`);
+          }
+        }
+        
+      } catch (error) {
+        DEBUG.error(`Error loading user transactions: ${error.message}`);
+        transactionsContainer.innerHTML = '<p>Erreur lors du chargement des transactions</p>';
+      }
+    }
+    
+    async function acheterCarte(offreId, acheteurId) {
+      if (!confirm('Confirmer l\'achat de cette voiture ?')) {
+        console.log(`Purchase cancelled by user confirmation`);
+        return;
+      }
+      
+      try {
+        console.log(`Starting purchase flow for car offer ${offreId} by user ${acheteurId}`);
+        
+        // Show loading state
+        const buyButton = document.querySelector(`.acheter-btn[data-offre-id="${offreId}"]`);
+        const cardElement = buyButton ? buyButton.closest('.card') : null;
+        
+        if (buyButton) {
+          console.log(`Disabling buy button and showing loading state`);
+          buyButton.disabled = true;
+          buyButton.innerHTML = '<span>Commande en cours...</span>';
+        }
+        
+        // Make the purchase request
+        console.log(`Making purchase request to server`);
+        const response = await fetch(`/api/market/acheter/${offreId}?acheteurId=${acheteurId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        // Handle response
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Order successful! Transaction ID: ${data.id}`);
+          
+          // Step 1: Update the card's owner in the carte-service
+          const cardId = data.carteId;
+          
+          try {
+            // First get the card details
+            const cardResponse = await fetch(`/api/cartes/${cardId}`);
+            if (cardResponse.ok) {
+              const card = await cardResponse.json();
+              
+              // Now update the card ownership
+              const updateData = {
+                ...card,
+                proprietaireId: parseInt(acheteurId),
+                aVendre: false // No longer for sale
+              };
+              
+              const updateResponse = await fetch(`/api/cartes/${cardId}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+              });
+              
+              if (updateResponse.ok) {
+                console.log(`Card ${cardId} ownership transferred to user ${acheteurId}`);
+              } else {
+            console.error(`Failed to update vehicle ownership: ${await updateResponse.text()}`);
+              }
+            }
+          } catch (cardError) {
+            console.error(`Error updating vehicle ownership: ${cardError.message}`);
+          }
+          
+          // Show success message
+          showMessage('Commande confirmée ! La voiture a été achetée avec succès.', 'success');
+          
+          // Remove the card from the display
+          if (cardElement) {
+            cardElement.style.opacity = '0.5';
+            setTimeout(() => {
+              cardElement.style.display = 'none';
+            }, 1000);
+          }
+          
+          // Reload data
+          loadUserData();
+          loadActiveOffers();
+          loadUserTransactions(currentUserId);
+          
+        } else {
+          // Purchase failed
+          let errorMsg = "Erreur lors de la commande";
+          try {
+            const errorText = await response.text();
+            console.error(`Purchase error response: ${errorText}`);
+            errorMsg = errorText || errorMsg;
+          } catch (e) {
+            console.error(`Could not parse error response: ${e.message}`);
+          }
+          
+          // Show error message
+          showMessage(`Erreur: ${errorMsg}`, 'error');
+          
+          // Reset button
+          if (buyButton) {
+            buyButton.disabled = false;
+            buyButton.textContent = 'Acheter';
+          }
+        }
+      } catch (error) {
+        console.error(`Critical error during purchase: ${error.message}`);
+        showMessage(`Erreur technique: ${error.message}`, 'error');
+        
+        // Reset any UI elements
+        document.querySelectorAll('.acheter-btn').forEach(btn => {
+          btn.disabled = false;
+          btn.textContent = 'Acheter';
+        });
+      }
+    }
+    
+    async function cancelOffer(offreId) {
+      if (!confirm('Voulez-vous vraiment retirer cette offre du marché ?')) {
+        return;
+      }
+      
+      try {
+        const cancelResponse = await debugFetch(`/api/market/offres/${offreId}`, {
+          method: 'DELETE'
+        });
+        
+        if (cancelResponse.ok) {
+          alert('Offre retirée du marché avec succès');
+          // Reload offers and transactions
+          loadActiveOffers();
+          loadUserTransactions(currentUserId);
+        } else {
+          alert('Erreur lors du retrait de l\'offre');
+        }
+      } catch (error) {
+        DEBUG.error(`Error cancelling offer: ${error.message}`);
+        alert('Erreur lors du retrait de l\'offre: ' + error.message);
+      }
+    }
+    
+    function showMessage(message, type) {
+      const messageContainer = document.getElementById('message-container');
+      if (!messageContainer) return;
+      
+      const messageEl = document.createElement('div');
+      messageEl.className = type + '-message';
+      messageEl.textContent = message;
+      
+      messageContainer.innerHTML = '';
+      messageContainer.appendChild(messageEl);
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        messageEl.style.opacity = '0';
+        setTimeout(() => {
+          if (messageContainer.contains(messageEl)) {
+            messageContainer.removeChild(messageEl);
+          }
+        }, 500);
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
